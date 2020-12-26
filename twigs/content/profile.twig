@@ -1,0 +1,41 @@
+{% set parsley = TRUE %}
+
+{% set title = context.user.login ~ '\'s Profile' %}
+
+{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {text: 'Profile'}] %}
+
+{% set schema = 'itemscope="" itemtype="http://schema.org/ProfilePage"' %}
+
+{% extends '@content/page.twig' %}
+
+{% import '@util/formmacro.twig' as f %}
+
+
+{% block onload %}
+$('#pform').on('submit', function(e){
+    return $(this).parsley().validate(); 
+}).parsley(); 
+{% endblock onload %}
+
+{% block header %}
+    <article class="col-md-12 mt-5">
+        <h1 class="text-center mt-5"> {{context.user.login}}'s Profile </h1>
+    </article>
+{% endblock header %}
+
+{% block main %}
+    <section class="row">
+        <article class="ml-auto col-md-8 mr-auto">
+            {% include '@util/message.twig' %}
+            {{f.startform({method: 'post', id: 'pform'})}}
+                {{f.email({label: 'Your Email Address', name: 'email', value: context.user.email, ph: 'Your email address', parsley: {trigger: 'blur'}})}}
+                {{f.password({label: 'New Password', id: 'upw', name: 'pw', ph: '********', parsley: {trigger: 'blur', minlength: 8}})}}
+                {{f.password({label: 'Confirm Password', name: 'cpw', ph: '********', parsley: {equalto: '#upw', trigger: 'blur', minlength: 8}})}}
+                {{f.submit({value: 'Update'})}}
+            {{f.endform()}}
+        </article>
+    </section>
+{% endblock main %}
+
+{% block footer %}
+{% endblock footer %}
