@@ -13,7 +13,7 @@
         public const DB	= 'webproject';
         public const DBUSER	= 'webproject';
         public const DBPW	= 'FUK(f/K]}p+H(7BW';
-        public const SITENAME	= 'webproject';
+        public const SITENAME	= 'Marimba';
         public const SITENOREPLY	= 'noreply@localhost.org';
         public const SYSADMIN	= 'mcnika1234@gmail.com';
         public const DBRX	= FALSE;
