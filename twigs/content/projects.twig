@@ -1,43 +1,8 @@
-{#
-    There several variables you can set at the top of a Twig to control some of the things
-    that the Framework includes in the output. Look at twigs/content/page.twig to see all
-    the possible variables and how they are used.
-#}
-{#
-    If your page uses AJAX include this line at the start of the file - it loads a different version of jQuery.
-{% set ajax = TRUE %}
-#}
-{#
-    If your page uses the Framework JS util package include this line at the start of the file
-{% set fwutils = TRUE %}
-#}
-{#
-    If your page uses Parsley include this line at the start of the file
-{% set parsley = TRUE %}
-#}
-{#
-    If your page uses the inline editable package include this line at the start of the file
-{% set editable = TRUE %}
-#}
-
-{#
-    If your page does NOT need not use bootbox then this will stop the JS being loaded for it
-{% set usebootbox = FALSE %}
-#}
-
 
 {% set title = context.user.login ~ '\'s Projects' %}
 
-
-{#
-   If you want a breadcrumb trail below the navbar set this
-{% set breadcrumbs = [{link:'url1', text: 'Top Level'}, {link: 'url2': text: 'Second level'}, {text: 'Where we are'}] %}
-#}
-
-{#
-   If you want a <meta> Keywords tag set this
-{% set keywords = 'Framework, PHP, RedBean' %}
-#}
+{% import '@util/modalmacro.twig' as m %}
+{% import '@util/formmacro.twig' as f %}
 
 {#
    If you want a <meta> Description tag set this
@@ -119,7 +84,22 @@
 {% block main %}
     <section class="row">
         <article class="ml-auto col-md-12 mr-auto">
-
+        {# Create a button that opens a modal for adding projects. #}
+            <p>{{m.invoke('modal', 'Add a Project')}}</p>
+            {# Customise the modal for creating a project, adding a form. #}
+            {{m.open({id: 'modal', title: 'Please enter your project details.'})}}
+            <div class="modal-body">
+                {{f.startform({method: 'post', id: 'pform'})}}
+                    {{f.text({label: 'Project Title', name: 'title', ph: 'Project Title', parsley: {trigger: 'blur'}})}}
+                    {{f.textarea({label: 'Description', id: 'desc', name: 'desc', ph: 'Project Description', parsley: {trigger: 'blur', maxlength: 500}})}}
+                    {{f.checkbox({group: FALSE, ids : ['iprivc'], names: ['privc'], labels: ['Privated'], values: [1], check: [TRUE]})}}
+                {{f.endform()}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+                <input type="submit" value="Create Project" class="btn btn-primary" form="pform"/>
+            </div>
+            {{m.end()}}
         </article>
     </section>
 {% endblock main %}
