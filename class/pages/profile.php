@@ -2,8 +2,8 @@
 /**
  * A class that contains code to handle any requests for  /profile/
  *
- * @author Your Name <Your@email.org>
- * @copyright year You
+ * @author Michael Coviello <b8034196@newcastle.ac.uk>
+ * @copyright 2021 Michael Coviello
  * @package Framework
  * @subpackage UserPages
  */
