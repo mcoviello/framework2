@@ -31,8 +31,8 @@
                 $user = $context->user();
                 try
                 {
-                    $email = $fdt.mustfetch('email', FILTER_VALIDATE_EMAIL);
-                    if($email !== $user.email)
+                    $email = $fdt->mustfetch('email', FILTER_VALIDATE_EMAIL);
+                    if($email !== $user->email)
                     {//it is not the same as the current email
                         $user->email = $email;
                         $change = TRUE;
