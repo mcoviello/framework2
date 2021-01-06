@@ -25,10 +25,9 @@
 {% set usebootbox = FALSE %}
 #}
 
-{#
-    if you want to set the title of your  page that is displayed in browser tabs set this variable
-{% set title = 'My Page Title' %}
-#}
+
+{% set title = context.user.login ~ '\'s Projects' %}
+
 
 {#
    If you want a breadcrumb trail below the navbar set this
@@ -51,18 +50,6 @@
 #}
 
 {% extends '@content/page.twig' %}
-
-{# this brings in some useful macros for making forms
-{% import '@util/formmacro.twig' as f %}
-#}
-
-{# this brings in macros for accessing values in the config database
-{% import '@util/attrmacro.twig' as h %}
-#}
-
-{# this brings in some useful macros for making modals
-{% import '@util/modalmacro.twig' as m %}
-#}
 
 {% block meta %}
 {# <meta> for things like keywords etc.#}
@@ -125,31 +112,17 @@
 
 {% block header %}
     <article class="col-md-12">
-        <h1 class="text-center">{{action}}</h1>
+        <h1 class="text-left mt-5">{{context.user.login}}'s Projects</h1>
     </article>
 {% endblock header %}
 
 {% block main %}
     <section class="row">
-        <article class="ml-auto col-md-8 mr-auto">
-            <p class="text-center">Coming Soon</p>
+        <article class="ml-auto col-md-12 mr-auto">
+
         </article>
     </section>
 {% endblock main %}
 
-{# uncomment this and delete the footer block below to remove the <footer> tag altogether
-{% block pagefooter %}
-{% endblock pagefooter %}
-#}
-
-{#
-    If you have a standard footer for all (most) pages then put the
-    content in the file twigs/surround/footer.twig. It is included by page.twig by
-    default. You then don't need to have a footer block either.
-#}
-
 {% block footer %}
-    <article class="col-md-12">
-        <p class="text-center">Footer</p>
-    </article>
 {% endblock footer %}
