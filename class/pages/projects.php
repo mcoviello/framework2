@@ -2,14 +2,15 @@
 /**
  * A class that contains code to handle any requests for  /projects/
  *
- * @author Your Name <Your@email.org>
- * @copyright year You
+ * @author Michael Coviello <b8034196@newcastle.ac.uk>
+ * @copyright 2021 Michael Coviello
  * @package Framework
  * @subpackage UserPages
  */
     namespace Pages;
 
     use \Support\Context as Context;
+    use \R;
 /**
  * Support /projects/
  */
@@ -24,6 +25,7 @@
  */
         public function handle(Context $context)
         {
+            $context->local()->message(\Framework\Local::MESSAGE, 'bruh');
             return '@content/projects.twig';
         }
     }
