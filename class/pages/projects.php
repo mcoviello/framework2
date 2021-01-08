@@ -35,10 +35,13 @@
                 $priv = $fdt->fetch('privc');
 
                 if($title !== ''){
+                    //Dispense a project bean
                     $project = R::dispense('project');
+                    //Set its parameters
                     $project->title = $title;
                     $project->description = $desc;
                     $project->private = ($priv ? 1 : 0);
+                    //Need to made this Many-Many instead of 1-Many when multiple user support is added
                     $project->user = $user;
                     $suc = TRUE;
                 } 
