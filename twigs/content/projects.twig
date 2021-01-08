@@ -12,8 +12,6 @@
 $('#pform').on('submit', function(e){
     return $(this).parsley().validate(); 
 }).parsley(); 
-
-$('#modal').modal(backdrop='static');
 {% endblock onload %}
 
 {% block header %}
@@ -26,23 +24,47 @@ $('#modal').modal(backdrop='static');
     <section class="row">
         <article class="ml-auto col-md-12 mr-auto">
         {# Create a button that opens a modal for adding projects. #}
-            <p>{{m.invoke('modal', 'Add a Project')}}</p>
+            <p class="float-right">{{m.invoke('modal', 'Add a Project')}}</p>
             {# Customise the modal for creating a project, adding a form. #}
             {{m.open({id: 'modal', title: 'Please enter your project details.'})}}
             <div class="modal-body">
              {% include '@util/message.twig' %}
                 {{f.startform({method: 'post', id: 'pform'})}}
-                    {{f.text({label: 'Project Title', name: 'title', ph: 'Project Title', parsley: {trigger: 'blur', minlength: 3, required: true}})}}
-                    {{f.textarea({label: 'Description (Optional)', id: 'desc', name: 'desc', ph: 'Project Description', parsley: {trigger: 'blur'}})}}
+                    {{f.text({label: 'Project Title', name: 'title', ph: 'My Project', parsley: {trigger: 'blur', minlength: 3, required: true}})}}
+                    {{f.textarea({label: 'Description (Optional)', id: 'desc', name: 'desc', ph: 'Describe your project here...', parsley: {trigger: 'blur'}})}}
                     {{f.checkbox({group: FALSE, ids : ['iprivc'], names: ['privc'], labels: ['Privated'], values: [1], check: [TRUE]})}}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
                 <input class = "btn btn-primary" type="submit" value = "Create Project"/>
-                
                 {{f.endform()}}
             </div>
             {{m.end()}}
+        </article>
+    </section>
+
+    <section class="row">
+        <article class="ml-auto col-md-12 mr-auto">
+            <div class="jumbotron">
+                <div class="row">
+                    {# create cards for all of the user's projects#}
+                    {% for u in siteinfo.fetch('project',TRUE) %}
+                    <div class="col-sm-12 col-md-6 col-lg-4 mt-1">
+                        <div class="card h-100 text-white bg-dark">
+                            <div class="card-body">
+                                <h5 class="card-title">{{u.title}}</h5>
+                                <p>{{u.description}}</p>
+                            </div>
+                            <div class="card-footer text-right">
+                                <a href="#" class="btn btn-light">View Project</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                        <p class="text-muted">You do not have any projects.</p>
+                    {% endfor %}
+                </div>
+            </div>
         </article>
     </section>
 {% endblock main %}
