@@ -57,6 +57,19 @@
  */
         private $fwconfig       = [];
 /**
+ * @var bool   Developer mode?
+ */
+        private $devel          = FALSE;
+/**
+ * Return state of devel flag
+ *
+ * @return bool
+ **/
+        public function develMode()
+        {
+            return $this->devel;
+        }
+/**
  * Send mail if possible
  *
  * @param string[]       $to       An array of people to send to.
@@ -478,6 +491,7 @@
         {
             $this->basepath = $basedir;
             $this->basedname = Config::BASEDNAME;
+            $this->devel = $devel;
 /*
  * If you want to be able to move the system arbitrarily you will need
  * the functionality of the next block of code.
@@ -514,21 +528,19 @@
             if (Config::DBHOST !== '' && $loadrb)
             { // looks like there is a database configured
                 \R::setup(Config::DBTYPE.':host='.Config::DBHOST.';dbname='.Config::DB, Config::DBUSER, Config::DBPW); // mysql initialiser
-                \R::freeze(!$devel); // freeze DB for production systems
-                $this->fwconfig = [];
-                try
-                { // sometimes RB does not get a connection
-                    foreach (\R::findAll(FW::CONFIG) as $cnf)
-                    {
-                        $cnf->value = preg_replace('/%BASE%/', $this->basedname, $cnf->value);
-                        $this->fwconfig[$cnf->name] = $cnf;
-                    }
-                }
-                catch (\Exception $e)
-                { // But what do we do?
-                    $this->errorHandler->earlyFail('OVERLOAD', 'The site is currently experiencing a heavy load, please try again later.', TRUE);
+                if (!\R::testConnection())
+                {
+                    $this->errorHandler->earlyFail('Database Error', 'Cannot connect to the database. Database may not be running or the site may be overloaded, please try later.', TRUE);
                     /* NOT REACHED */
                 }
+                \R::freeze(!$devel); // freeze DB for production systems
+                $this->fwconfig = [];
+                foreach (\R::findAll(FW::CONFIG) as $cnf)
+                {
+                    $cnf->value = preg_replace('/%BASE%/', $this->basedname, $cnf->value);
+                    $this->fwconfig[$cnf->name] = $cnf;
+                }
+
                 if ($loadtwig)
                 {
                     /** @psalm-suppress PossiblyNullReference */
