@@ -29,6 +29,7 @@
             { //there is a post
                 $change = FALSE;
                 $user = $context->user();
+                
                 try
                 {
                     $email = $fdt->mustfetch('email', FILTER_VALIDATE_EMAIL);
