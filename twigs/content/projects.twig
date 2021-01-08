@@ -1,79 +1,20 @@
+{% set parsley = TRUE %}
 
 {% set title = context.user.login ~ '\'s Projects' %}
 
-{% import '@util/modalmacro.twig' as m %}
-{% import '@util/formmacro.twig' as f %}
-
-{#
-   If you want a <meta> Description tag set this
-{% set description = 'A PHP framework for building RESTful systems' %}
-#}
-
-{#
-   You can set a schema that describes the page with this variable - see http://schema.org for what values are available
-{% set schema = 'itemscope="" itemtype="http://schema.org/AboutPage"' %}
-#}
-
 {% extends '@content/page.twig' %}
 
-{% block meta %}
-{# <meta> for things like keywords etc.#}
-{% endblock meta %}
+{% import '@util/modalmacro.twig' as m %}
 
-{% block links %}
-{# <link> for non-css and non-type things#}
-{% endblock links %}
-
-{% block type %}
-{# <link> for webfonts #}
-{% endblock type %}
-
-{% block css %}
-{# <link> for any other CSS files you need #}
-{% endblock css %}
-
-{# If you want some inline CSS then put it in this block - no <style> tags - it is better NOT to use this though!!
-{% block style %}
-{% endblock style %}
-#}
-
-{# If you want to add critical CSS then put it in this block - no <style> tags
-{% block criticalCSS %}
-{% endblock criticalCSS %}
-#}
-
-{% block scripts %}
-{# <script src=""></script> for any other JS files you need #}
-{% endblock scripts %}
-
-{% block setup %}
-{# Any javascript you need that is NOT run on load goes in this block. ***NB you don't need <script></script> tags here*** #}
-{% endblock setup %}
+{% import '@util/formmacro.twig' as f %}
 
 {% block onload %}
-{# Any javascript you need that MUST run on load goes in this block. ***NB you don't need <script></script> tags here*** #}
+$('#pform').on('submit', function(e){
+    return $(this).parsley().validate(); 
+}).parsley(); 
+
+$('#modal').modal(backdrop='static');
 {% endblock onload %}
-
-{# uncomment this if you don't want the default navbar to appear
-{% block navigation %}
-{% endblock navigation %}
-#}
-
-{#
-    Edit the file navbar.twig to change the appearance of the
-    navigation bar. It is included by default from page.twig
-#}
-
-{# uncomment this and delete header block below to remove the <header> tag altogether
-{% block pageheader %}
-{% endblock pageheader %}
-#}
-
-{#
-    If you have a standard header for all (most) pages then put the
-    content in the file twigs/surround/header.twig. It is included by page.twig by
-    default. You then don't need to have a header block either.
-#}
 
 {% block header %}
     <article class="col-md-12">
@@ -89,15 +30,17 @@
             {# Customise the modal for creating a project, adding a form. #}
             {{m.open({id: 'modal', title: 'Please enter your project details.'})}}
             <div class="modal-body">
+             {% include '@util/message.twig' %}
                 {{f.startform({method: 'post', id: 'pform'})}}
-                    {{f.text({label: 'Project Title', name: 'title', ph: 'Project Title', parsley: {trigger: 'blur'}})}}
-                    {{f.textarea({label: 'Description', id: 'desc', name: 'desc', ph: 'Project Description', parsley: {trigger: 'blur', maxlength: 500}})}}
+                    {{f.text({label: 'Project Title', name: 'title', ph: 'Project Title', parsley: {trigger: 'blur', minlength: 3, required: true}})}}
+                    {{f.textarea({label: 'Description (Optional)', id: 'desc', name: 'desc', ph: 'Project Description', parsley: {trigger: 'blur'}})}}
                     {{f.checkbox({group: FALSE, ids : ['iprivc'], names: ['privc'], labels: ['Privated'], values: [1], check: [TRUE]})}}
-                {{f.endform()}}
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
-                <input type="submit" value="Create Project" class="btn btn-primary" form="pform"/>
+                <input class = "btn btn-primary" type="submit" value = "Create Project"/>
+                
+                {{f.endform()}}
             </div>
             {{m.end()}}
         </article>

@@ -26,24 +26,33 @@
         public function handle(Context $context)
         {
             $fdt = $context->formdata('post');
-            if($fdt->exists('title') && $fdt->exists('desc'))
+            if($fdt->exists('title'))
             {
+                $suc = FALSE;
                 $user = $context->user();
                 $title = $fdt->mustfetch('title');
                 $desc = $fdt->mustfetch('desc');
-                $priv = ($fdt->mustfetch('privc'));
+                $priv = $fdt->fetch('privc');
 
-                if($title !== '' && $desc !== '')
-                {
+                if($title !== ''){
                     $project = R::dispense('project');
                     $project->title = $title;
                     $project->description = $desc;
-                    $project->private = $priv;
-                    //$user->noLoad()->ownProject[] = $project;
-                    //R::store($user);
+                    $project->private = ($priv ? 1 : 0);
+                    $project->user = $user;
+                    $suc = TRUE;
+                } 
+                else
+                {
+                    $context->local()->message(\Framework\Local::ERROR, 'Project must have a title.');
+                }
+
+                if($suc){
+                    R::store($project);
                     $context->local()->message(\Framework\Local::MESSAGE, 'Project Successfully Created'); 
                 }
             }
+
             return '@content/projects.twig';
         }
     }
