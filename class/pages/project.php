@@ -1,23 +1,22 @@
 <?php
 /**
- * A class that contains code to handle any requests for  /projects/
+ * A class that contains code to handle any requests for  /project/
  *
  * @author Michael Coviello <b8034196@newcastle.ac.uk>
  * @copyright 2021 Michael Coviello
  * @package Framework
  * @subpackage UserPages
  */
-    namespace Pages;
+    namespace pages;
 
     use \Support\Context as Context;
-    use \R;
 /**
- * Support /projects/
+ * Support /project/
  */
-    class Projects extends \Framework\Siteaction
+    class project extends \Framework\Siteaction
     {
 /**
- * Handle projects operations
+ * Handle project operations
  *
  * @param Context   $context    The context object for the site
  *
@@ -25,7 +24,9 @@
  */
         public function handle(Context $context)
         {
-            return '@content/projects.twig';
+            $id = $context->rest();
+            
+            return '@content/project.twig';
         }
     }
 ?>

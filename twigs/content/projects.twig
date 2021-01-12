@@ -1,18 +1,42 @@
+{% set ajax = TRUE %}
+
+{% set fwutils = TRUE %}
+
 {% set parsley = TRUE %}
 
-{% set title = context.user.login ~ '\'s Projects' %}
-
 {% extends '@content/page.twig' %}
+
+{% set title = context.user.login ~ '\'s Projects' %}
 
 {% import '@util/modalmacro.twig' as m %}
 
 {% import '@util/formmacro.twig' as f %}
 
 {% block onload %}
-$('#pform').on('submit', function(e){
-    return $(this).parsley().validate(); 
-}).parsley(); 
+$('#addmform').on('submit', false).parsley();
+$('#addb').on('click', function(e){
+        e.preventDefault();
+        $(this).attr('disabled', true);
+        let data = {private : 0};
+        const frm = $('#addmform');
+        $('input:checked', frm).each(function(index, element){
+             data[$(this).attr('name')] = 1;
+        });
+        $('input:text,input[type="textarea"]', frm).each(function(index, element){
+             data[$(this).attr('name')] = $(this).val();
+        });
+        framework.beanCreate('project', data, function(ret){
+            $('#addm').modal('hide');
+        }, '#addb');
+    });
 {% endblock onload %}
+
+{% if not page is defined %}
+    {% set page = 1 %}
+    {% set pagesize = 10 %}
+{% endif %}
+
+{% set pages = siteinfo.pagecount('project', pagesize) %}
 
 {% block header %}
     <article class="col-md-12">
@@ -24,42 +48,39 @@ $('#pform').on('submit', function(e){
     <section class="row">
         <article class="ml-auto col-md-12 mr-auto">
         {# Create a button that opens a modal for adding projects. #}
-            <p class="float-right">{{m.invoke('modal', 'Add a Project')}}</p>
+            <p class="float-right">{{m.invoke('addm', 'Add a Project')}}</p>
             {# Customise the modal for creating a project, adding a form. #}
-            {{m.open({id: 'modal', title: 'Please enter your project details.'})}}
+            {{m.open({id: 'addm', title: 'Please enter your project details.'})}}
             <div class="modal-body">
              {% include '@util/message.twig' %}
-                {{f.startform({method: 'post', id: 'pform'})}}
+                {{f.startform({method: 'post', id: 'addmform'})}}
                     {{f.text({label: 'Project Title', name: 'title', ph: 'My Project', parsley: {trigger: 'blur', minlength: 3, required: true}})}}
-                    {{f.textarea({label: 'Description (Optional)', id: 'desc', name: 'desc', ph: 'Describe your project here...', parsley: {trigger: 'blur'}})}}
-                    {{f.checkbox({group: FALSE, ids : ['iprivc'], names: ['privc'], labels: ['Privated'], values: [1], check: [TRUE]})}}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
-                <input class = "btn btn-primary" type="submit" value = "Create Project"/>
+                    {{f.textarea({label: 'Description (Optional)', id: 'textarea', name: 'description', ph: 'Describe your project here...', parsley: {trigger: 'blur'}})}}
+                    {{f.checkbox({group: FALSE, names: ['private'], labels: ['Privated'], values: [1], check: [TRUE]})}}
                 {{f.endform()}}
             </div>
-            {{m.end()}}
+            {{m.close({action: 'Add', id: 'addb'})}}
         </article>
     </section>
 
     <section class="row">
-        <article class="ml-auto col-md-12 mr-auto">
-            <div class="jumbotron">
+        <article class="mx-auto col-md-12">
+            <div class="jumbotron p-4">
                 <div class="row">
-                    {# create cards for all of the user's projects#}
-                    {% for u in siteinfo.fetch('project',TRUE) %}
-                    <div class="col-sm-12 col-md-6 col-lg-4 mt-1">
-                        <div class="card h-100 text-white bg-dark">
-                            <div class="card-body">
-                                <h5 class="card-title">{{u.title}}</h5>
-                                <p>{{u.description}}</p>
-                            </div>
-                            <div class="card-footer text-right">
-                                <a href="#" class="btn btn-light">View Project</a>
+                    {# create cards for all of the user's projects #}
+                    {% for u in context.user.projects() %}
+                        <div class="col-sm-12 col-md-6 col-lg-4 mt-1">
+                            <div class="card h-100 text-white bg-dark">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{u.title}}</h5>
+                                    <p>{{u.description}}</p>
+                                </div>
+                                <div class="card-footer text-right">
+                                    <a  class="btn btn-light" href="{{base}}/project/{{u.id}}">View Project</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    {# otherwise, if they have no projects, display text instead #}
                     {% else %}
                         <p class="text-muted">You do not have any projects.</p>
                     {% endfor %}

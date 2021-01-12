@@ -59,6 +59,7 @@
         public function addData(Context $context) : void
         {
         }
+
 /**
  * Function called when a user bean is updated - do error checking in here
  *
@@ -78,6 +79,16 @@
 /**
  * @todo Validate the joined field. Correct date, not in the future
  */
+        }
+
+/**
+ * Returns the projects associated with a user
+ *
+ * @return array<project>
+ */
+        public function projects() : array
+        {
+            return $this->bean->ownProject;
         }
     }
 ?>
