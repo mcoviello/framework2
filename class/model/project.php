@@ -17,6 +17,7 @@
  */
     class Project extends \RedBeanPHP\SimpleModel
     {
+
 /**
  * @var string   The type of the bean that stores roles for this page
  * @phpcsSuppress SlevomatCodingStandard.Classes.UnusedPrivateElements
@@ -50,7 +51,7 @@
             if (self::titleValid($title))
             {
                 $user = $context->user();
-                $desc = $fdt->mustFetch('description');
+                $desc = $fdt->fetch('description');
                 //Dispense a project bean
                 $project = \R::dispense('project');
                 //Set its parameters
@@ -76,7 +77,7 @@
             
         }
 
-        /**
+/**
  * A function to ensure that the title being used for a project is valid.
  *
  * @param string    $title  The title

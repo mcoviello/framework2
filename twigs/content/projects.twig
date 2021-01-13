@@ -22,18 +22,19 @@ $('#addb').on('click', function(e){
         $('input:checked', frm).each(function(index, element){
              data[$(this).attr('name')] = 1;
         });
-        $('input:text,input[type="textarea"]', frm).each(function(index, element){
+        $('input:text,textarea', frm).each(function(index, element){
              data[$(this).attr('name')] = $(this).val();
         });
         framework.beanCreate('project', data, function(ret){
             $('#addm').modal('hide');
+            bootbox.alert('<h3>'Project Successfully Created'</h3>';
         }, '#addb');
     });
 {% endblock onload %}
 
 {% if not page is defined %}
-    {% set page = 1 %}
-    {% set pagesize = 10 %}
+    {% set page = 2 %}
+    {% set pagesize = 3 %}
 {% endif %}
 
 {% set pages = siteinfo.pagecount('project', pagesize) %}
@@ -54,7 +55,7 @@ $('#addb').on('click', function(e){
             <div class="modal-body">
              {% include '@util/message.twig' %}
                 {{f.startform({method: 'post', id: 'addmform'})}}
-                    {{f.text({label: 'Project Title', name: 'title', ph: 'My Project', parsley: {trigger: 'blur', minlength: 3, required: true}})}}
+                    {{f.text({label: 'Project Title', name: 'title', ph: 'My Project', parsley: {trigger: 'blur', minlength: 3, required: TRUE}})}}
                     {{f.textarea({label: 'Description (Optional)', id: 'textarea', name: 'description', ph: 'Describe your project here...', parsley: {trigger: 'blur'}})}}
                     {{f.checkbox({group: FALSE, names: ['private'], labels: ['Privated'], values: [1], check: [TRUE]})}}
                 {{f.endform()}}
@@ -69,7 +70,7 @@ $('#addb').on('click', function(e){
                 <div class="row">
                     {# create cards for all of the user's projects #}
                     {% for u in context.user.projects() %}
-                        <div class="col-sm-12 col-md-6 col-lg-4 mt-1">
+                        <div class="col-sm-12 col-md-6 col-lg-4 mt-2 mb-2">
                             <div class="card h-100 text-white bg-dark">
                                 <div class="card-body">
                                     <h5 class="card-title">{{u.title}}</h5>
@@ -86,6 +87,7 @@ $('#addb').on('click', function(e){
                     {% endfor %}
                 </div>
             </div>
+            {% include '@util/paginate.twig' with { page : page, pagesize: pagesize, pages: pages} %}
         </article>
     </section>
 {% endblock main %}
