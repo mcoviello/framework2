@@ -50,8 +50,12 @@
             $title = $fdt->mustFetch('title'); // make sure we have a title...
             if (self::titleValid($title))
             {
-                $user = $context->user();
                 $desc = $fdt->fetch('description');
+                    if(!self::descValid($desc))
+                    {
+                        throw new \Framework\Exception\BadValue('Description contains invalid characters.');
+                    }
+                $user = $context->user();
                 //Dispense a project bean
                 $project = \R::dispense('project');
                 //Set its parameters
@@ -88,15 +92,39 @@
  */
         public static function titleValid(string $title) : bool
         {
+            trim($title);
+
             if ($title === '')
             {
                 return false;
             }
-            if (!preg_match('/^[a-z0-9]+/i', $title))
+            if (!preg_match('/^[a-z0-9\s]+/i', $title))
             {
                 return false;
             }
-            
+            if(strlen($title) < 3)
+            {
+                return false;
+            }
+            return true;
+        }
+
+/**
+ * A function to ensure that the description being used for a project is valid.
+ *
+ * @param string    $desc  The description
+ *
+ * @throws \Framework\Exception\BadValue If a bad password is detected this could be thrown
+ *
+ * @return bool
+ */
+        public static function descValid(string $desc) : bool
+        {
+            //The description isn't empty, but contains invalid characters
+            if ($desc !== '' && !preg_match('/^[a-z0-9.,\s]+/i', $desc))
+            {
+                return false;
+            }
             return true;
         }
     }
