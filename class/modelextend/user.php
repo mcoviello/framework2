@@ -80,19 +80,5 @@
  * @todo Validate the joined field. Correct date, not in the future
  */
         }
-
-/**
- * Returns the projects associated with a user
- * 
- * @param int $page The current page the user is on
- * 
- * @param int $pageSize The number of elements that can fit on a page
- *
- * @return array<project>
- */
-        public function projects(int $page, int $pageSize) : array
-        {
-            return $this->bean->ownProject;
-        }
     }
 ?>
