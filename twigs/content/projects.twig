@@ -4,13 +4,23 @@
 
 {% set parsley = TRUE %}
 
+{% block css %}
+    <link rel="stylesheet" href="{{assets}}/scss/cards.scss">
+{% endblock css %}
+
 {% extends '@content/page.twig' %}
 
 {% set title = context.user.login ~ '\'s Projects' %}
 
+{% import '@content/iconmacro.twig' as i %}
 {% import '@util/modalmacro.twig' as m %}
-
 {% import '@util/formmacro.twig' as f %}
+
+{% if not page is defined %}
+    {% set page = 1 %}
+{% endif %}
+
+{% set pagesize = 6 %}
 
 {% block onload %}
 $('#addmform').on('submit', false).parsley();
@@ -27,17 +37,14 @@ $('#addb').on('click', function(e){
         });
         framework.beanCreate('project', data, function(ret){
             $('#addm').modal('hide');
-            bootbox.alert('<h3>'Project Successfully Created'</h3>';
+            bootbox.alert('<h3>Project Successfully Created</h3>', function(){
+                location.reload();
+            });
         }, '#addb');
     });
 {% endblock onload %}
 
-{% if not page is defined %}
-    {% set page = 2 %}
-    {% set pagesize = 3 %}
-{% endif %}
-
-{% set pages = siteinfo.pagecount('project', pagesize) %}
+{% set pages = siteinfo.pagecount('project', pagesize, 'user_id=?', [context.user.id]) %}
 
 {% block header %}
     <article class="col-md-12">
@@ -49,13 +56,13 @@ $('#addb').on('click', function(e){
     <section class="row">
         <article class="ml-auto col-md-12 mr-auto">
         {# Create a button that opens a modal for adding projects. #}
-            <p class="float-right">{{m.invoke('addm', 'Add a Project')}}</p>
+            <p class="float-right">{{m.invoke('addm','Add a Project')}}</p>
             {# Customise the modal for creating a project, adding a form. #}
             {{m.open({id: 'addm', title: 'Please enter your project details.'})}}
             <div class="modal-body">
              {% include '@util/message.twig' %}
                 {{f.startform({method: 'post', id: 'addmform'})}}
-                    {{f.text({label: 'Project Title', name: 'title', ph: 'My Project', parsley: {trigger: 'blur', minlength: 3, required: TRUE}})}}
+                    {{f.text({label: 'Project Title', name: 'title', ph: 'My Project', parsley: {trigger: 'blur', whitespace: 'trim' , minlength: 3, required: TRUE}})}}
                     {{f.textarea({label: 'Description (Optional)', id: 'textarea', name: 'description', ph: 'Describe your project here...', parsley: {trigger: 'blur'}})}}
                     {{f.checkbox({group: FALSE, names: ['private'], labels: ['Privated'], values: [1], check: [TRUE]})}}
                 {{f.endform()}}
@@ -67,27 +74,33 @@ $('#addb').on('click', function(e){
     <section class="row">
         <article class="mx-auto col-md-12">
             <div class="jumbotron p-4">
-                <div class="row">
+                {% include '@util/paginate.twig' with { page : page, pagesize: pagesize, pages: pages} %}
+                <div class="row" id="pgrid">
                     {# create cards for all of the user's projects #}
-                    {% for u in context.user.projects() %}
+                    {% for p in siteinfo.fetch('project', 'user_id=?', [context.user.id], page, pagesize) %}
                         <div class="col-sm-12 col-md-6 col-lg-4 mt-2 mb-2">
-                            <div class="card h-100 text-white bg-dark">
+                            <div class="card text-white bg-dark shadow">
                                 <div class="card-body">
-                                    <h5 class="card-title">{{u.title}}</h5>
-                                    <p>{{u.description}}</p>
+                                    <h5 class="card-title text-capitalize">{{p.title}}</h5>
+                                    {% if p.description%}
+                                    <p>{{p.description}}</p>
+                                    {% else %}
+                                    <p class="font-italic text-muted">This project has no description.</p>
+                                    {% endif %}
                                 </div>
                                 <div class="card-footer text-right">
-                                    <a  class="btn btn-light" href="{{base}}/project/{{u.id}}">View Project</a>
+                                    <a  class="btn btn-light" href="{{base}}/projects/view/project/{{p.id}}">{{i.view}} View Project</a>
                                 </div>
                             </div>
                         </div>
                     {# otherwise, if they have no projects, display text instead #}
                     {% else %}
-                        <p class="text-muted">You do not have any projects.</p>
+                     <div class="col-md-12">
+                        <p class="text-muted m-1">You do not have any projects.</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
-            {% include '@util/paginate.twig' with { page : page, pagesize: pagesize, pages: pages} %}
         </article>
     </section>
 {% endblock main %}

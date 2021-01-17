@@ -16,6 +16,41 @@
  */
     class Projects extends \Framework\Siteaction
     {
+
+/**
+ * View project
+ *
+ * @param Context           $context  The Context object
+ * @param array<string>     $rest     The rest of the URL
+ *
+ * @return string
+ */
+        public function view(Context $context, array $rest) : string
+        {
+            if (count($rest) < 3)
+            {
+                throw new \Framework\Exception\ParameterCount('Too few parameters');
+            }
+            $bean = $rest[1];
+            switch($bean)
+            {
+                case 'project':
+                    $rest = $context->rest();
+                    $id = $rest[2];
+                    $proj = $context->load($bean, $id);
+                    if($proj->id && $context->user()->id == $proj->user_id)
+                    {
+                        $context->local()->addval($bean, $proj);
+                    }
+                    else
+                    {
+                        throw new \Framework\Exception\BadValue('You do not have permission to view this project.');
+                    }
+                    return '@content/project.twig';
+                default :
+                    return '@content/note.twig';
+            }
+        }
 /**
  * Handle projects operations
  *
@@ -25,7 +60,15 @@
  */
         public function handle(Context $context)
         {
-            return '@content/projects.twig';
+            $rest = $context->rest();
+            switch($rest[0])
+            {
+                case 'view':
+                    return $this->view($context, $rest);
+                default:
+                    $context->setPages();
+                    return '@content/projects.twig';
+            }
         }
     }
 ?>
