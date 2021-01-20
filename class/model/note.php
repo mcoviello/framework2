@@ -47,21 +47,39 @@
         {
             $now = $context->utcnow(); // make sure time is in UTC
             $fdt = $context->formdata('post');
+
             $title = $fdt->mustFetch('title'); // make sure we have a title...
             $note = $fdt->mustFetch('note');   //and a description...
+            $projectID = $fdt->mustFetch('project'); // and a project ID
             if (self::titleValid($title) && self::noteValid($note))
             {
-                $rest = $context->rest();
-                //@todo fix the note project id
-                $project = $rest[1];
-                //Dispense a project bean
+                //Dispense a note bean
                 $noteBean = \R::dispense('note');
                 //Set its parameters
                 $noteBean->title = $title;
                 $noteBean->note = $note;
                 $noteBean->created = $now;
-                $noteBean->project = $project;
-                \R::store($noteBean);
+
+                if($fdt->fetch('incTime',0) == 1)
+                {
+                    $started = $fdt->mustFetch('startDate').':00';
+                    $finished = $fdt->mustFetch('endDate').':00';
+                    if(self::datesValid($started, $finished, $now))
+                    {
+                        $noteBean->started = $started;
+                        $noteBean->finished = $finished;
+                    }
+                    else
+                    {
+                        //Invalid dates
+                        throw new \Framework\Exception\BadValue('Invalid Start and/or End Dates');
+                    }
+                }
+                
+                //Set is as cascade delete for the project
+                $project = \R::load('project', $projectID);
+                $project->xownNote[]= $noteBean;
+                \R::store($project);
                 return $noteBean;
             } 
             else
@@ -69,8 +87,7 @@
             // bad return
             throw new \Framework\Exception\BadValue('Invalid Title or Note');
             }
-        }
-
+        }     
 /**
  * A function to ensure that the title being used for a project is valid.
  *
@@ -111,7 +128,41 @@
         public static function noteValid(string $note) : bool
         {
             //The description isn't empty, but contains invalid characters
-            if ($note !== '' && !preg_match('/^[a-z0-9.,\s]+/i', $note))
+            trim($note);
+
+            if ($note === '')
+            {
+                return false;
+            }
+            if (!preg_match('/^[a-z0-9\s]+/i', $note))
+            {
+                return false;
+            }
+            return true;
+        }
+
+/**
+ * A function to ensure that the dates being used for a project are valid.
+ *
+ * @param string    $desc  The description
+ *
+ * @throws \Framework\Exception\BadValue If a bad password is detected this could be thrown
+ *
+ * @return bool
+ */
+        public static function datesValid(string $startDate, string $endDate, string $now) : bool
+        {
+            if($startDate >= $endDate)
+            {
+                return false;
+            }
+            //Regex for the speified date format
+            if(!preg_match('/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[" "][0-9]{2}[:][0-9]{2}[:][0-9]{2})+/i', $startDate) ||
+            !preg_match('/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[" "][0-9]{2}[:][0-9]{2}[:][0-9]{2})+/i', $endDate))
+            {
+                return false;
+            }
+            if($startDate > $now || $endDate > $now)
             {
                 return false;
             }

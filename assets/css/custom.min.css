@@ -1,0 +1,1 @@
+.card {width: 100%;border: 2px solid transparent;}.card:hover {border: 2px solid #FFFFFF;}.card-body {overflow-y: hidden;height: 0;padding-bottom: 50%;}input[readonly].datepicker, input[readonly].timepicker {background-color: white;}

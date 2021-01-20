@@ -1,21 +1,58 @@
 {% set ajax = TRUE %}
+
 {% set fwutils = TRUE %}
+
 {% set parsley = TRUE %}
+
+{% set editable = TRUE %}
+
+{% extends '@content/page.twig' %}
 
 {% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {text: project.title}] %}
 {% import '@content/iconmacro.twig' as i %}
 {% import '@util/modalmacro.twig' as m %}
 {% import '@util/formmacro.twig' as f %}
 
-{% extends '@content/page.twig' %}
+{% block css %}
+<link rel="stylesheet" href="{{assets}}/css/custom.min.css" />
+{% endblock css %}
+
+{% block scripts %}
+    <script src="{{assets}}/js/moment.js"></script>
+{% endblock scripts %}
+
+{% set title = 'MARIMBA - ' ~ project.title %}
+
+{% if not page is defined %}
+    {% set page = 1 %}
+{% endif %}
+
+{% set pagesize = 6 %}
+
+{% block setup %}
+$(function(){
+    $('.datepicker').combodate();
+});
+{% endblock setup %}
 
 {% block onload %}
+$('#delb').on('click', function(e){
+    framework.deletebean(e, $(this), 'project', {{project.id}}, function(ret){
+        bootbox.alert('<h3>Project Deleted.</h3>', function(){
+                window.location.replace('{{base}}/projects');
+            });
+    });
+});
+
 $('#addnform').on('submit', false).parsley();
 $('#addb').on('click', function(e){
         e.preventDefault();
         $(this).attr('disabled', true);
-        let data = {};
+        let data = {project: {{project.id}}};
         const frm = $('#addnform');
+        $('input:checked', frm).each(function(index, element){
+             data[$(this).attr('name')] = $(this).val();
+        });
         $('input:text,textarea', frm).each(function(index, element){
              data[$(this).attr('name')] = $(this).val();
         });
@@ -26,12 +63,18 @@ $('#addb').on('click', function(e){
             });
         }, '#addb');
     });
+
+$('#incTime').change(function() {
+    $('.datepicker').attr('disabled',!this.checked);
+    $('.timepicker').attr('disabled',!this.checked);
+    $(this.checked ? $('#datetime').show(300) : $('#datetime').hide(300));
+});
 {% endblock onload %}
 
 {% block header %}
     <article class="col-md-12 mt-5">
-    <button type="button" class="btn btn-danger float-right">Danger</button>
-    <p class="font-italic text-muted text-right mt-5"> Created at: {{project.created}}</p>
+    <p class="font-italic text-muted text-right mt-5 mr-5"> Created at: {{project.created}}</p>
+    <button type="button" class="btn btn-danger float-right" id="delb">{{i.delete}} Delete Project</button>
         <h1> {{project.title}} </h1>
     </article>
 {% endblock header %}
@@ -50,15 +93,42 @@ $('#addb').on('click', function(e){
              {% include '@util/message.twig' %}
                 {{f.startform({method: 'post', id: 'addnform'})}}
                     {{f.text({label: 'Note Title (Required)', name: 'title', ph: 'Note Title', parsley: {trigger: 'blur', whitespace: 'trim' , required: TRUE}})}}
+                    {{f.checkbox({group: FALSE, names: ['incTime'], labels: ['Include Start and End Dates?'], values: [1], ids:['incTime'], check: [TRUE]})}}
+                    <section class="col-md-10 mx-auto m-3" id="datetime">
+                        <label>Started: </label>
+                        <div class="input-group">
+                            <input type="text" class="form-control datepicker" placeholder="Starting Date" name="startDate" data-format="YYYY-MM-DD HH:mm" readonly>
+                        </div>
+                        <label class="mt-4">Finished: </label>
+                        <div class="input-group mb-1">
+                            <input type="text" class="form-control datepicker" placeholder="Ending Date" name="endDate" data-format="YYYY-MM-DD HH:mm" readonly>
+                        </div>
+                    </section>
                     {{f.textarea({label: 'Note', id: 'textarea', name: 'note', ph: 'Write Your Note Here', parsley: {trigger: 'blur', required: TRUE}})}}
                 {{f.endform()}}
             </div>
             {{m.close({action: 'Add', id: 'addb'})}}
 
         <div class="jumbotron p-4">
-            {# otherwise, if they have no projects, display text instead #}
-                <div class="col-md-12">
-                <p class="text-muted m-1">This project doesn't have any notes.</p>
+            <div class="row">
+                {% for n in siteinfo.fetch('note', 'project_id=?', [project.id], page, pagesize) %}
+                    <div class="col-sm-12 col-md-6 col-lg-4 mt-2 mb-2">
+                        <div class="card bg-light shadow">
+                            <div class="card-body">
+                                <h5 class="card-title text-capitalize">{{n.title}}</h5>
+                                <p>{{n.note}}</p>
+                            </div>
+                            <div class="card-footer text-right">
+                                <a  class="btn btn-light" href="{{base}}/projects/view/note/{{n.id}}">{{i.view}} View Note</a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    {# otherwise, if they have no notes, display text instead #}
+                        <div class="col-md-12">
+                        <p class="text-muted m-1">This project doesn't have any notes.</p>
+                {% endfor %}
+            </div>
         </div>
         </article>
     </section>

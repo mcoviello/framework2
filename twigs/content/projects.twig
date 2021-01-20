@@ -5,12 +5,12 @@
 {% set parsley = TRUE %}
 
 {% block css %}
-    <link rel="stylesheet" href="{{assets}}/scss/cards.scss">
+    <link rel="stylesheet" href="{{assets}}/css/custom.min.css">
 {% endblock css %}
 
 {% extends '@content/page.twig' %}
 
-{% set title = context.user.login ~ '\'s Projects' %}
+{% set title = 'MARIMBA - Projects' %}
 
 {% import '@content/iconmacro.twig' as i %}
 {% import '@util/modalmacro.twig' as m %}
@@ -82,14 +82,15 @@ $('#addb').on('click', function(e){
                             <div class="card text-white bg-dark shadow">
                                 <div class="card-body">
                                     <h5 class="card-title text-capitalize">{{p.title}}</h5>
-                                    {% if p.description%}
+                                    {% if p.description %}
                                     <p>{{p.description}}</p>
                                     {% else %}
                                     <p class="font-italic text-muted">This project has no description.</p>
                                     {% endif %}
                                 </div>
                                 <div class="card-footer text-right">
-                                    <a  class="btn btn-light" href="{{base}}/projects/view/project/{{p.id}}">{{i.view}} View Project</a>
+                                <p class="text-muted float-left">{{splural(siteinfo.count('note', 'project_id=?', [p.id]),'Note')}}</p>
+                                    <a class="btn btn-light" href="{{base}}/projects/view/project/{{p.id}}">{{i.view}} View Project</a>
                                 </div>
                             </div>
                         </div>

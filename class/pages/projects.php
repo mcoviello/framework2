@@ -47,8 +47,21 @@
                         throw new \Framework\Exception\BadValue('You do not have permission to view this project.');
                     }
                     return '@content/project.twig';
-                default :
+                case 'note' :
+                    $rest = $context->rest();
+                    $id = $rest[2];
+                    $proj = $context->load($bean, $id);
+                    if($proj->id && $context->user()->id == $proj->user_id)
+                    {
+                        $context->local()->addval($bean, $proj);
+                    }
+                    else
+                    {
+                        throw new \Framework\Exception\BadValue('You do not have permission to view this note.');
+                    }
                     return '@content/note.twig';
+                default:
+                    throw new \Framework\Exception\BadValue($rest[1].' is not viewable.');
             }
         }
 /**
