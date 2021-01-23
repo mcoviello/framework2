@@ -1,0 +1,75 @@
+{% set ajax = TRUE %}
+
+{% set fwutils = TRUE %}
+
+{% set parsley = TRUE %}
+
+{% set editable = TRUE %}
+
+{% extends '@content/page.twig' %}
+
+{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {link: base ~ '/projects/view/project/'~project.id~'/',text: project.title}, {link: base ~ '/projects/view/note/'~note.id~'/', text: note.title}, {text: 'Edit Note'}] %}
+{% import '@content/iconmacro.twig' as i %}
+{% import '@util/modalmacro.twig' as m %}
+{% import '@util/formmacro.twig' as f %}
+
+{% block scripts %}
+    <script src="{{assets}}/js/moment.js"></script>
+{% endblock scripts %}
+
+{% set title = 'MARIMBA - ' ~ project.title %}
+
+{% block setup %}
+$(function(){
+    $('.datepicker').combodate();
+});
+{% endblock setup %}
+
+{% block onload %}
+
+$('#editpform').on('submit', function(e){
+    return $(this).parsley().validate();
+});
+
+$('#incTime').change(function() {
+    $('.datepicker').attr('disabled',!this.checked);
+    $('#startD').prop('required', this.checked);
+    $('#endD').prop('required', this.checked);
+    $(this.checked ? $('#datetime').show(300) : $('#datetime').hide(300));
+});
+{% endblock onload %}
+
+{% block header %}
+    <article class="col-md-12 mt-5">
+        <h1 class="mt-5"> Edit Note: <span class="font-italic">{{note.title}}</span></h1>
+    </article>
+{% endblock header %}
+
+{% block main %}
+<section class="row">
+    <article class="col-md-12">
+     {% include '@util/message.twig' %}
+        <form action="#" method="post" id="editpform" data-parsley-validate>
+            {{f.hidden({name: 'bean', value: note.id})}}
+            {{f.text({label: 'Note Title (Required)', name: 'title', value: note.title, ph: 'Note Title', parsley: {trigger: 'blur', minlength:3 , whitespace: 'trim', required: TRUE}})}}
+            {{f.checkbox({group: FALSE, names: ['incTime'], labels: ['Edit Start and End Dates?'], values: [1], ids:['incTime'], check: [TRUE]})}}
+            <section class="col-md-10 mx-auto m-3" id="datetime">
+                <label>Started: </label>
+                <div class="input-group" id="ig1">
+                    <input type="text" id="startD" class="form-control datepicker" placeholder="Starting Date" data-parsley-errors-container="#ig1" name="startDate" value={{note.created}} data-format="YYYY-MM-DD HH:mm" readonly required>
+                </div>
+                <label class="mt-4">Finished: </label>
+                <div class="input-group mb-1" id="ig2">
+                    <input type="text" id="endD" class="form-control datepicker" placeholder="Ending Date" data-parsley-errors-container="#ig2" name="endDate" data-format="YYYY-MM-DD HH:mm" readonly required>
+                </div>
+            </section>
+            {{f.textarea({label: 'Note (Required)', id: 'textarea', name: 'note', value: note.note, ph: 'Write your note here...', parsley: {trigger: 'blur'}})}}
+            <a class="btn btn-secondary btn-lg" href="{{base}}/projects/view/note/{{note.id}}/" type="submit">Return to Note</a>
+            <button class="btn btn-primary btn-lg" type="submit">Save</button>
+        {{f.endform()}}
+    </article>
+</section>
+{% endblock main %}
+
+{% block pagefooter %}
+{% endblock pagefooter %}

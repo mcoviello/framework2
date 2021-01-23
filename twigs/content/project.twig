@@ -6,16 +6,17 @@
 
 {% set editable = TRUE %}
 
+{% block css %}
+<link rel="stylesheet" href="{{assets}}/css/custom.min.css" />
+{% endblock css %}
+
 {% extends '@content/page.twig' %}
 
-{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {text: project.title}] %}
 {% import '@content/iconmacro.twig' as i %}
 {% import '@util/modalmacro.twig' as m %}
 {% import '@util/formmacro.twig' as f %}
 
-{% block css %}
-<link rel="stylesheet" href="{{assets}}/css/custom.min.css" />
-{% endblock css %}
+{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {text: project.title}] %}
 
 {% block scripts %}
     <script src="{{assets}}/js/moment.js"></script>
@@ -27,7 +28,7 @@
     {% set page = 1 %}
 {% endif %}
 
-{% set pagesize = 6 %}
+{% set pagesize = 8 %}
 
 {% block setup %}
 $(function(){
@@ -36,6 +37,7 @@ $(function(){
 {% endblock setup %}
 
 {% block onload %}
+
 $('#delb').on('click', function(e){
     framework.deletebean(e, $(this), 'project', {{project.id}}, function(ret){
         bootbox.alert('<h3>Project Deleted.</h3>', function(){
@@ -43,10 +45,10 @@ $('#delb').on('click', function(e){
             });
     });
 });
-
-$('#addnform').on('submit', false).parsley();
 $('#addb').on('click', function(e){
-        e.preventDefault();
+    e.preventDefault();
+    if($('#addnform').parsley().validate())
+    {
         $(this).attr('disabled', true);
         let data = {project: {{project.id}}};
         const frm = $('#addnform');
@@ -62,19 +64,24 @@ $('#addb').on('click', function(e){
                 location.reload();
             });
         }, '#addb');
-    });
+    }
+});
 
 $('#incTime').change(function() {
     $('.datepicker').attr('disabled',!this.checked);
-    $('.timepicker').attr('disabled',!this.checked);
+    $('#startD').prop('required', this.checked);
+    $('#endD').prop('required', this.checked);
     $(this.checked ? $('#datetime').show(300) : $('#datetime').hide(300));
 });
 {% endblock onload %}
+
+{% set pages = siteinfo.pagecount('note', pagesize, 'project_id=?', [project.id]) %}
 
 {% block header %}
     <article class="col-md-12 mt-5">
     <p class="font-italic text-muted text-right mt-5 mr-5"> Created at: {{project.created}}</p>
     <button type="button" class="btn btn-danger float-right" id="delb">{{i.delete}} Delete Project</button>
+    <a class="btn btn-secondary float-right mr-3" href="{{base}}/projects/edit/project/{{project.id}}/">{{i.edit}} Edit Project</a>
         <h1> {{project.title}} </h1>
     </article>
 {% endblock header %}
@@ -92,34 +99,35 @@ $('#incTime').change(function() {
             <div class="modal-body">
              {% include '@util/message.twig' %}
                 {{f.startform({method: 'post', id: 'addnform'})}}
-                    {{f.text({label: 'Note Title (Required)', name: 'title', ph: 'Note Title', parsley: {trigger: 'blur', whitespace: 'trim' , required: TRUE}})}}
+                    {{f.text({label: 'Note Title (Required)', name: 'title', ph: 'Note Title', parsley: {trigger: 'blur', minlength:3 , whitespace: 'trim', required: TRUE}})}}
                     {{f.checkbox({group: FALSE, names: ['incTime'], labels: ['Include Start and End Dates?'], values: [1], ids:['incTime'], check: [TRUE]})}}
                     <section class="col-md-10 mx-auto m-3" id="datetime">
                         <label>Started: </label>
-                        <div class="input-group">
-                            <input type="text" class="form-control datepicker" placeholder="Starting Date" name="startDate" data-format="YYYY-MM-DD HH:mm" readonly>
+                        <div class="input-group" id="ig1">
+                            <input type="text" id="startD" class="form-control datepicker" placeholder="Starting Date" data-parsley-errors-container="#ig1" name="startDate" data-format="YYYY-MM-DD HH:mm" readonly required>
                         </div>
                         <label class="mt-4">Finished: </label>
-                        <div class="input-group mb-1">
-                            <input type="text" class="form-control datepicker" placeholder="Ending Date" name="endDate" data-format="YYYY-MM-DD HH:mm" readonly>
+                        <div class="input-group mb-1" id="ig2">
+                            <input type="text" id="endD" class="form-control datepicker" placeholder="Ending Date" data-parsley-errors-container="#ig2" name="endDate" data-format="YYYY-MM-DD HH:mm" readonly required>
                         </div>
                     </section>
-                    {{f.textarea({label: 'Note', id: 'textarea', name: 'note', ph: 'Write Your Note Here', parsley: {trigger: 'blur', required: TRUE}})}}
+                    {{f.textarea({label: 'Note', id: 'textarea', name: 'note', ph: 'Write Your Note Here'})}}
                 {{f.endform()}}
             </div>
             {{m.close({action: 'Add', id: 'addb'})}}
 
         <div class="jumbotron p-4">
+        {% include '@util/paginate.twig' with { page : page, pagesize: pagesize, pages: pages} %}
             <div class="row">
                 {% for n in siteinfo.fetch('note', 'project_id=?', [project.id], page, pagesize) %}
-                    <div class="col-sm-12 col-md-6 col-lg-4 mt-2 mb-2">
+                    <div class="col-sm-6 col-md-4 col-lg-3 mt-2 mb-2">
                         <div class="card bg-light shadow">
                             <div class="card-body">
                                 <h5 class="card-title text-capitalize">{{n.title}}</h5>
-                                <p>{{n.note}}</p>
+                                <p class="text-muted">Created: {{n.created}}</p>
                             </div>
-                            <div class="card-footer text-right">
-                                <a  class="btn btn-light" href="{{base}}/projects/view/note/{{n.id}}">{{i.view}} View Note</a>
+                            <div class="card-footer text-center">
+                                <a  class="btn btn-light" href="{{base}}/projects/view/note/{{n.id}}/">{{i.view}} View Note</a>
                             </div>
                         </div>
                     </div>

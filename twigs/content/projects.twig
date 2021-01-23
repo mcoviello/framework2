@@ -5,8 +5,13 @@
 {% set parsley = TRUE %}
 
 {% block css %}
-    <link rel="stylesheet" href="{{assets}}/css/custom.min.css">
+    <link rel="stylesheet" href="{{assets}}/css/custom.min.css" />
 {% endblock css %}
+
+{% block meta %}
+    <meta name="keywords" content="Marimba, project, projects, logging, logger" />
+    <meta name="description" content="The home page of the Marimba project logging website." />
+{% endblock meta %}
 
 {% extends '@content/page.twig' %}
 
@@ -90,7 +95,7 @@ $('#addb').on('click', function(e){
                                 </div>
                                 <div class="card-footer text-right">
                                 <p class="text-muted float-left">{{splural(siteinfo.count('note', 'project_id=?', [p.id]),'Note')}}</p>
-                                    <a class="btn btn-light" href="{{base}}/projects/view/project/{{p.id}}">{{i.view}} View Project</a>
+                                    <a class="btn btn-light" href="{{base}}/projects/view/project/{{p.id}}/">{{i.view}} View Project</a>
                                 </div>
                             </div>
                         </div>

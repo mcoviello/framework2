@@ -1,0 +1,44 @@
+{% set ajax = TRUE %}
+
+{% set fwutils = TRUE %}
+
+{% set parsley = TRUE %}
+
+{% set editable = TRUE %}
+
+{% extends '@content/page.twig' %}
+
+{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {link: base ~ '/projects/view/project/'~project.id~'/', text: project.title}, {text: 'Edit Project'}] %}
+{% import '@util/formmacro.twig' as f %}
+
+{% set title = 'MARIMBA - ' ~ project.title %}
+
+{% block onload %}
+$('#editpform').on('submit', function(e){
+    return $(this).parsley().validate();
+});
+{% endblock onload %}
+
+{% block header %}
+    <article class="col-md-12 mt-5">
+        <h1 class="mt-5"> Edit Project: <span class="font-italic">{{project.title}}</span></h1>
+    </article>
+{% endblock header %}
+
+{% block main %}
+<section class="row">
+    <article class="col-md-12">
+     {% include '@util/message.twig' %}
+        <form action="#" method="post" id="editpform" data-parsley-validate>
+            {{f.hidden({name: 'bean', value: project.id})}}
+            {{f.text({label: 'Project Title', name: 'title', value: project.title, ph: 'Note Title', parsley: {trigger: 'blur', minlength:3 , whitespace: 'trim', required: TRUE}})}}
+            {{f.textarea({label: 'Description', id: 'textarea', name: 'description', value: project.description, ph: 'Describe your project here...', parsley: {trigger: 'blur'}})}}
+            <a class="btn btn-secondary btn-lg" href="{{base}}/projects/view/project/{{project.id}}/" type="submit">Back to Project</a>
+            <button class="btn btn-primary btn-lg" type="submit">Save</button>
+        {{f.endform()}}
+    </article>
+</section>
+{% endblock main %}
+
+{% block pagefooter %}
+{% endblock pagefooter %}

@@ -29,7 +29,7 @@
  */
         private static $editfields = [
             'title'     => [TRUE, FALSE],         // [NOTEMPTY]
-            'description'     => [TRUE, FALSE],         // [NOTEMPTY]
+            'note'     => [TRUE, FALSE],         // [NOTEMPTY]
         ];
 
         use \ModelExtend\FWEdit;
@@ -49,10 +49,16 @@
             $fdt = $context->formdata('post');
 
             $title = $fdt->mustFetch('title'); // make sure we have a title...
-            $note = $fdt->mustFetch('note');   //and a description...
             $projectID = $fdt->mustFetch('project'); // and a project ID
-            if (self::titleValid($title) && self::noteValid($note))
+            $note = $fdt->mustFetch('note'); // and a note ...
+            if (!self::titleValid($title))
             {
+
+            }
+            if (!self::noteValid($note))
+            {
+                
+            }
                 //Dispense a note bean
                 $noteBean = \R::dispense('note');
                 //Set its parameters
@@ -60,7 +66,7 @@
                 $noteBean->note = $note;
                 $noteBean->created = $now;
 
-                if($fdt->fetch('incTime',0) == 1)
+                if ($fdt->fetch('incTime',0) == 1)
                 {
                     $started = $fdt->mustFetch('startDate').':00';
                     $finished = $fdt->mustFetch('endDate').':00';
@@ -81,35 +87,25 @@
                 $project->xownNote[]= $noteBean;
                 \R::store($project);
                 return $noteBean;
-            } 
-            else
-            {
-            // bad return
-            throw new \Framework\Exception\BadValue('Invalid Title or Note');
-            }
         }     
 /**
  * A function to ensure that the title being used for a project is valid.
  *
  * @param string    $title  The title
  *
- * @throws \Framework\Exception\BadValue If a bad password is detected this could be thrown
- *
  * @return bool
  */
         public static function titleValid(string $title) : bool
         {
-            trim($title);
-
             if ($title === '')
             {
                 return false;
             }
-            if (!preg_match('/^[a-z0-9\s]+/i', $title))
+            if (strlen($title) < 3)
             {
                 return false;
             }
-            if(strlen($title) < 3)
+            if (!preg_match('/^[a-zA-Z0-9\s]*$/', $title))
             {
                 return false;
             }
@@ -117,24 +113,19 @@
         }
 
 /**
- * A function to ensure that the description being used for a project is valid.
+ * A function to ensure that the note being used for a note is valid.
  *
- * @param string    $desc  The description
- *
- * @throws \Framework\Exception\BadValue If a bad password is detected this could be thrown
+ * @param string    $title  The title
  *
  * @return bool
  */
         public static function noteValid(string $note) : bool
         {
-            //The description isn't empty, but contains invalid characters
-            trim($note);
-
             if ($note === '')
             {
                 return false;
             }
-            if (!preg_match('/^[a-z0-9\s]+/i', $note))
+            if (!preg_match('/^[a-zA-Z0-9\s.,?]*$/', $note))
             {
                 return false;
             }
@@ -144,9 +135,9 @@
 /**
  * A function to ensure that the dates being used for a project are valid.
  *
- * @param string    $desc  The description
- *
- * @throws \Framework\Exception\BadValue If a bad password is detected this could be thrown
+ * @param string    $startdate  The starting date and time on the form
+ * @param string    $startdate  The ending date and time on the form
+ * @param string    $startdate  The current date and time
  *
  * @return bool
  */
@@ -156,7 +147,7 @@
             {
                 return false;
             }
-            //Regex for the speified date format
+            //Regex for the specified date format
             if(!preg_match('/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[" "][0-9]{2}[:][0-9]{2}[:][0-9]{2})+/i', $startDate) ||
             !preg_match('/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[" "][0-9]{2}[:][0-9]{2}[:][0-9]{2})+/i', $endDate))
             {
@@ -168,5 +159,32 @@
             }
             return true;
         }
+
+/**
+ * Handle an edit form for this project
+ *
+ * @param Context   $context    The context object
+ *
+ * @return array [TRUE if error, [error messages]]
+ */
+        public function edit(Context $context) : array
+        {
+            $now = $context->utcnow();
+            $fdt = $context->formdata('post');
+            $title = $fdt->mustFetch('title'); // make sure we have a title...
+            $note = $fdt->mustFetch('note');
+            if (!self::titleValid($title))
+            {
+                throw new \Framework\Exception\BadValue('Invalid Title (Must be at least 3 characters long and can only contain letters, numbers, and spaces.)');
+            } 
+            if (!self::noteValid($note))
+            {
+                throw new \Framework\Exception\BadValue('Invalid Note (Note can only contain letters, numbers, spaces, full-stops, commas and question-marks.)');
+            }
+            $emess = $this->dofields($fdt);
+            $context->local()->addval('note', $this->bean);
+            return [!empty($emess), $emess];
+        }
+
     }
 ?>
