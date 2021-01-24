@@ -10,6 +10,7 @@
     namespace Pages;
 
     use \Support\Context as Context;
+    use \Config\Config;
     use \R;
 /**
  * Support /projects/
@@ -38,7 +39,7 @@
                     $rest = $context->rest();
                     $id = $rest[2];
                     $proj = $context->load($bean, $id);
-                    if($proj->id && $context->user()->id == $proj->user_id)
+                    if ($proj->id && $context->user()->id == $proj->user_id)
                     {
                         $context->local()->addval($bean, $proj);
                     }
@@ -52,7 +53,7 @@
                     $id = $rest[2];
                     $note = $context->load($bean, $id);
                     $proj = $context->load('project',$note->project_id);
-                    if($proj->id && $note->id && $context->user()->id == $proj->user_id)
+                    if ($proj->id && $note->id && $context->user()->id == $proj->user_id)
                     {
                         $context->local()->addval('project', $proj);
                         $context->local()->addval($bean, $note);
@@ -60,6 +61,23 @@
                     else
                     {
                         throw new \Framework\Exception\BadValue('You do not have permission to view this note.');
+                    }
+                    $fdt = $context->formdata('file');
+                    if ($fdt->exists('uploads'))
+                    {
+                        foreach($fdt->fileArray('uploads') as $ix => $fa)
+                        { // we only support private or public in this case so there is no flag
+                            $upl = \R::dispense('upload');
+                            $upl->note_id = $note->id;
+                            if (!$upl->savefile($context, $fa, Config::UPUBLIC, $context->user(), $ix))
+                            { // something went wrong
+                                \Model\Upload::fail($context, $fa);
+                            }
+                            else
+                            {
+                                $context->local()->message(\Framework\Local::MESSAGE, $fa['name'].' uploaded');
+                            }
+                        }
                     }
                     return '@content/note.twig';
                 default:
@@ -124,6 +142,7 @@ public function edit(Context $context, array $rest) : string
             { // something odd...
                 throw new \Framework\Exception\BadValue('Invalid Bean Parameter');
             }
+            \Framework\Utility\CSRFGuard::getinstance()->check();
             try
             {
                 [$error, $emess] = $editbean->edit($context);
@@ -156,7 +175,7 @@ public function edit(Context $context, array $rest) : string
         public function handle(Context $context)
         {
             $rest = $context->rest();
-            switch($rest[0])
+            switch ($rest[0])
             {
                 case 'view':
                     $context->setPages();

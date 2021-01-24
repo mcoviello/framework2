@@ -11,7 +11,7 @@
 {% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {link: base ~ '/projects/view/project/'~project.id~'/', text: project.title}, {text: 'Edit Project'}] %}
 {% import '@util/formmacro.twig' as f %}
 
-{% set title = 'MARIMBA - ' ~ project.title %}
+{% set title = 'MARIMBA - Edit ' ~ project.title %}
 
 {% block onload %}
 $('#editpform').on('submit', function(e){
@@ -31,6 +31,7 @@ $('#editpform').on('submit', function(e){
      {% include '@util/message.twig' %}
         <form action="#" method="post" id="editpform" data-parsley-validate>
             {{f.hidden({name: 'bean', value: project.id})}}
+            {{project.guard|raw}}
             {{f.text({label: 'Project Title', name: 'title', value: project.title, ph: 'Note Title', parsley: {trigger: 'blur', minlength:3 , whitespace: 'trim', required: TRUE}})}}
             {{f.textarea({label: 'Description', id: 'textarea', name: 'description', value: project.description, ph: 'Describe your project here...', parsley: {trigger: 'blur'}})}}
             <a class="btn btn-secondary btn-lg" href="{{base}}/projects/view/project/{{project.id}}/" type="submit">Back to Project</a>

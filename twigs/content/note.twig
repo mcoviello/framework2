@@ -30,6 +30,15 @@ $('#delb').on('click', function(e){
             });
     });
 });
+
+$('.delcard').on('click', function(e){
+    
+    framework.deletebean(e, $(this), 'upload', $(this).data('upload-id'), function(ret){
+        bootbox.alert('<h3>File Deleted.</h3>', function(){
+                location.reload();
+            });
+    });
+});
 {% endblock onload %}
 
 {% block header %}
@@ -53,11 +62,38 @@ $('#delb').on('click', function(e){
     </section>
     {% endif %}
     <section class="row">
-        <article class="ml-auto col-md-10 mr-auto mt-1">
-            <h2>Attached Files</h2>
+        <article class="ml-auto col-md-10 col-sm-12 mr-auto mt-1">
+            <h2>Attached Files (Click to Download)</h2>
             <div class="ml-5">
+            <form action="#" method="post" role="form" enctype="multipart/form-data">
+                {{f.hidden({name: 'note', value: note.id})}}
+                <div class="form-group">
+                    <label for="f0" class="control-label">Add a File</label>
+                    <input type="file" id="f0" name="uploads[]" class="form-control-file" required="required"/>
+                </div>
+                <button class="btn btn-primary mb-2" type="submit">Upload</button>
+            {{f.endform}}
                 <div class="jumbotron">
-                    <p class="m-1">Nothing here yet...</p>
+                    <div class="row" id="pgrid">
+                        {% for u in siteinfo.fetch('upload', 'note_id=?', [note.id], page, pagesize) %}
+                            <div class="col-sm-12 col-md-6 col-lg-4 mt-2 mb-2">
+                                <div class="card text-white bg-secondary shadow file">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{i.fa('file')}}</h5>
+                                        <h5 class="">{{u.filename}}</h5>
+                                    </div>
+                                    <div class="card-footer p-0">
+                                        <div class="btn-group w-100" role="group" aria-label="Basic example">
+                                            <a class="btn btn-primary" href="{{base}}/private/file/{{u.id}}">{{i.fa('file-download')}} Download</a>
+                                            <button type="button" class="btn btn-danger float-right delcard" data-upload-id="{{u.id}}">{{i.delete}} Delete</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="m-1">This note doesn't have any files.</p>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </article>

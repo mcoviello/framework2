@@ -127,7 +127,8 @@ $('#incTime').change(function() {
                                 <p class="text-muted">Created: {{n.created}}</p>
                             </div>
                             <div class="card-footer text-center">
-                                <a  class="btn btn-light" href="{{base}}/projects/view/note/{{n.id}}/">{{i.view}} View Note</a>
+                                <p class="text-muted float-left">{{splural(siteinfo.count('upload', 'note_id=?', [n.id]),'File')}}</p>
+                                <a class="btn btn-light float-right" href="{{base}}/projects/view/note/{{n.id}}/">{{i.view}} View Note</a>
                             </div>
                         </div>
                     </div>
