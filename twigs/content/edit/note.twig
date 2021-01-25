@@ -8,7 +8,11 @@
 
 {% extends '@content/page.twig' %}
 
-{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {link: base ~ '/projects/view/project/'~project.id~'/',text: project.title}, {link: base ~ '/projects/view/note/'~note.id~'/', text: note.title}, {text: 'Edit Note'}] %}
+{% block meta %}
+    <meta name="description" content="Edit a note." />
+{% endblock meta %}
+
+{% set breadcrumbs = [{link: base ~ '/projects', text: 'Projects'}, {link: base ~ '/projects/view/project/'~project.id~'/',text: project.title}, {link: base ~ '/projects/view/note/'~note.id~'/', text: note.title}, {text: 'Edit Note'}] %}
 {% import '@content/iconmacro.twig' as i %}
 {% import '@util/modalmacro.twig' as m %}
 {% import '@util/formmacro.twig' as f %}
@@ -40,7 +44,6 @@ $('#editpform').on('submit', function(e){
             {{f.hidden({name: 'bean', value: note.id})}}
             {{note.guard|raw}}
             {{f.text({label: 'Note Title (Required)', name: 'title', value: note.title, ph: 'Note Title', parsley: {trigger: 'blur', minlength:3 , whitespace: 'trim', required: TRUE}})}}
-            {{f.checkbox({group: FALSE, names: ['incTime'], labels: ['Edit Start and End Dates?'], values: [1], ids:['incTime'], check: [TRUE]})}}
             {{f.textarea({label: 'Note (Required)', id: 'textarea', name: 'note', value: note.note, ph: 'Write your note here...', parsley: {trigger: 'blur'}})}}
             <a class="btn btn-secondary btn-lg" href="{{base}}/projects/view/note/{{note.id}}/" type="submit">Return to Note</a>
             <button class="btn btn-primary btn-lg" type="submit">Save</button>

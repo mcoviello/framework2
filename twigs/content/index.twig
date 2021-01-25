@@ -1,36 +1,37 @@
 {% extends '@content/page.twig' %}
 
-{% block onload %}
-    $('#alert').on('click', function(){
-        bootbox.alert('Hello World')
-    })
-{% endblock onload %}
+{% set title = 'MARIMBA - Home' %}
 
 {% block header %}
     <section class="col-md-12 mt-5">
-        <h1 class="text-center">Header</h1>
+        <h1 class="text-left">Marimba</h1>
     </section>
 {% endblock header %}
 
+{% block meta %}
+    <meta name="description" content="The fast and simple project logging website." />
+{% endblock meta %}
+
 {% block main %}
     <section class="row">
-        <aside class="col">
-            <p>Left</p>
-        </aside>
-        <article class="col-md-8">
-            <div class="jumbotron">
-                This is the middle column
+        <article class="col-md-10 col-sm-12 mx-auto mt-4">
+            <div class="jumbotron border border-primary py-4">
+                <p class="lead">Welcome to Marimba, the fast and easy way to keep your projects organised!</p>
+                <hr />
+                <div class="mt-2">
+                    <p>To get started, try adding a Project in the <a href={{base}}/projects>Projects</a> section.</p>
+                    <p>From here, you can add Notes to the Project, which let you keep track of:</p>
+                    <ul class="ml-3">
+                        <li>The work you've done (or any other notes you like).</li>
+                        <li>The time you spent working.</li>
+                        <li>Any Files you want to attach to the Note.</li>
+                </ul>
+                <a class="btn btn-primary" href="{{base}}/projects/">Get Started</a>
+                </div>
             </div>
-            <button id="alert" class="btn btn-lg btn-info" type="button">Alert</button>
         </article>
-        <aside id="rightbar" class="col">
-            <p>Right</p>
-        </aside>
     </section>
 {% endblock main %}
 
 {% block footer %}
-    <section class="col-md-12">
-        <p class="text-center">Footer</p>
-    </section>
 {% endblock footer %}

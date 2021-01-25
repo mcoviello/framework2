@@ -8,7 +8,11 @@
 
 {% extends '@content/page.twig' %}
 
-{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {link: base ~ '/projects/view/project/'~project.id~'/', text: project.title}, {text: 'Edit Project'}] %}
+{% block meta %}
+    <meta name="description" content="Edit a project." />
+{% endblock meta %}
+
+{% set breadcrumbs = [{link: base ~ '/projects', text: 'Projects'}, {link: base ~ '/projects/view/project/'~project.id~'/', text: project.title}, {text: 'Edit Project'}] %}
 {% import '@util/formmacro.twig' as f %}
 
 {% set title = 'MARIMBA - Edit ' ~ project.title %}

@@ -12,11 +12,15 @@
 
 {% extends '@content/page.twig' %}
 
+{% block meta %}
+    <meta name="description" content="Details of a project." />
+{% endblock meta %}
+
 {% import '@content/iconmacro.twig' as i %}
 {% import '@util/modalmacro.twig' as m %}
 {% import '@util/formmacro.twig' as f %}
 
-{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {text: project.title}] %}
+{% set breadcrumbs = [{link: base ~ '/projects', text: 'Projects'}, {text: project.title}] %}
 
 {% block scripts %}
     <script src="{{assets}}/js/moment.js"></script>

@@ -12,7 +12,7 @@
     use \Config\Framework as FW;
     use \Support\Context;
 /**
- * A class implementing a RedBean model for User beans
+ * A class implementing a RedBean model for Project beans
  * @psalm-suppress UnusedClass
  */
     class Project extends \RedBeanPHP\SimpleModel
@@ -67,7 +67,7 @@
                 $project->created = $now;
                 $project->user = $user;
 
-                if($fdt->fetch('private',0) == 1)
+                if ($fdt->fetch('private',0) == 1)
                 {
                     $project->private = 1;
                 }
@@ -107,7 +107,7 @@
         }
 
 /**
- * A function to ensure that the title being used for a project is valid.
+ * A function to ensure that the description being used for a project is valid.
  *
  * @param string    $title  The title
  *
@@ -137,8 +137,9 @@ public static function descValid(string $desc) : bool
         public function edit(Context $context) : array
         {
             $fdt = $context->formdata('post');
-            $title = $fdt->mustFetch('title'); // make sure we have a title...
-            $desc = $fdt->fetch('description'); // make sure we have a title...
+            $title = $fdt->mustFetch('title');
+            $desc = $fdt->fetch('description');
+            //Error checking the title and description
             if (!self::titleValid($title))
             {
                 throw new \Framework\Exception\BadValue('Invalid Title (Must be at least 3 characters long and can only contain letters, numbers, and spaces.)');
@@ -147,7 +148,9 @@ public static function descValid(string $desc) : bool
             {
                 throw new \Framework\Exception\BadValue('Invalid Description (Description can only contain letters, numbers, spaces, full-stops, commas and question-marks.)');
             } 
+            //attempt to upload the bean fields
             $emess = $this->dofields($fdt);
+            //update the stored note
             $context->local()->addval('project', $this->bean);
             return [!empty($emess), $emess];
         }

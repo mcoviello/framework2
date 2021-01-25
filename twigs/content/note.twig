@@ -8,7 +8,11 @@
 
 {% extends '@content/page.twig' %}
 
-{% set breadcrumbs = [{link: base ~ '/', text: 'Home'}, {link: base ~ '/projects/view/project/'~project.id~'/',text: project.title}, {text: note.title}] %}
+{% block meta %}
+    <meta name="description" content="The details of a note." />
+{% endblock meta %}
+
+{% set breadcrumbs = [{link: base ~ '/projects', text: 'Projects'}, {link: base ~ '/projects/view/project/'~project.id~'/',text: project.title}, {text: note.title}] %}
 {% import '@content/iconmacro.twig' as i %}
 {% import '@util/modalmacro.twig' as m %}
 {% import '@util/formmacro.twig' as f %}
@@ -21,6 +25,12 @@
 
 {% block setup %}
 {% endblock setup %}
+
+{% if not page is defined %}
+    {% set page = 1 %}
+{% endif %}
+
+{% set pagesize = 6 %}
 
 {% block onload %}
 $('#delb').on('click', function(e){
@@ -40,6 +50,8 @@ $('.delcard').on('click', function(e){
     });
 });
 {% endblock onload %}
+
+{% set pages = siteinfo.pagecount('upload', pagesize, 'note_id=?', [note.id]) %}
 
 {% block header %}
     <article class="col-md-12 mt-5">
@@ -63,7 +75,7 @@ $('.delcard').on('click', function(e){
     {% endif %}
     <section class="row">
         <article class="ml-auto col-md-10 col-sm-12 mr-auto mt-1">
-            <h2>Attached Files (Click to Download)</h2>
+            <h2>Attached Files</h2>
             <div class="ml-5">
             <form action="#" method="post" role="form" enctype="multipart/form-data">
                 {{f.hidden({name: 'note', value: note.id})}}
@@ -74,6 +86,7 @@ $('.delcard').on('click', function(e){
                 <button class="btn btn-primary mb-2" type="submit">Upload</button>
             {{f.endform}}
                 <div class="jumbotron">
+                {% include '@util/paginate.twig' with { page : page, pagesize: pagesize, pages: pages} %}
                     <div class="row" id="pgrid">
                         {% for u in siteinfo.fetch('upload', 'note_id=?', [note.id], page, pagesize) %}
                             <div class="col-sm-12 col-md-6 col-lg-4 mt-2 mb-2">

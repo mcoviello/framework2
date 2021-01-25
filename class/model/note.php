@@ -12,7 +12,7 @@
     use \Config\Framework as FW;
     use \Support\Context;
 /**
- * A class implementing a RedBean model for User beans
+ * A class implementing a RedBean model for Note beans
  * @psalm-suppress UnusedClass
  */
     class Note extends \RedBeanPHP\SimpleModel
@@ -28,15 +28,15 @@
  * @phpcsSuppress SlevomatCodingStandard.Classes.UnusedPrivateElements
  */
         private static $editfields = [
-            'title'     => [TRUE, FALSE],         // [NOTEMPTY]
-            'note'     => [TRUE, FALSE],         // [NOTEMPTY]
+            'title'     => [TRUE, FALSE],
+            'note'     => [TRUE, FALSE],
         ];
 
         use \ModelExtend\FWEdit;
         use \ModelExtend\MakeGuard;
         use \Framework\Support\HandleRole;
 /**
- * Add a Project from a form - invoked by the AJAX bean operation
+ * Add a Note from a form - invoked by the AJAX bean operation
  *
  * @param Context    $context    The context object for the site
  *
@@ -89,7 +89,7 @@
                 return $noteBean;
         }     
 /**
- * A function to ensure that the title being used for a project is valid.
+ * A function to ensure that the title being used for a note is valid.
  *
  * @param string    $title  The title
  *
@@ -113,9 +113,9 @@
         }
 
 /**
- * A function to ensure that the note being used for a note is valid.
+ * A function to ensure that the note is valid.
  *
- * @param string    $title  The title
+ * @param string    $note  The note
  *
  * @return bool
  */
@@ -143,17 +143,17 @@
  */
         public static function datesValid(string $startDate, string $endDate, string $now) : bool
         {
-            if($startDate >= $endDate)
+            if ($startDate >= $endDate)
             {
                 return false;
             }
             //Regex for the specified date format
-            if(!preg_match('/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[" "][0-9]{2}[:][0-9]{2}[:][0-9]{2})+/i', $startDate) ||
+            if (!preg_match('/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[" "][0-9]{2}[:][0-9]{2}[:][0-9]{2})+/i', $startDate) ||
             !preg_match('/^([0-9]{4}[-][0-9]{2}[-][0-9]{2}[" "][0-9]{2}[:][0-9]{2}[:][0-9]{2})+/i', $endDate))
             {
                 return false;
             }
-            if($startDate > $now || $endDate > $now)
+            if ($startDate > $now || $endDate > $now)
             {
                 return false;
             }
@@ -161,7 +161,7 @@
         }
 
 /**
- * Handle an edit form for this project
+ * Handle an edit form for this note
  *
  * @param Context   $context    The context object
  *
@@ -173,6 +173,7 @@
             $fdt = $context->formdata('post');
             $title = $fdt->mustFetch('title'); // make sure we have a title...
             $note = $fdt->mustFetch('note');
+            //Perform error checking on the title and note
             if (!self::titleValid($title))
             {
                 throw new \Framework\Exception\BadValue('Invalid Title (Must be at least 3 characters long and can only contain letters, numbers, and spaces.)');
@@ -181,10 +182,11 @@
             {
                 throw new \Framework\Exception\BadValue('Invalid Note (Note can only contain letters, numbers, spaces, full-stops, commas and question-marks.)');
             }
+            //attempt to upload the bean fields
             $emess = $this->dofields($fdt);
+            //update the stored note
             $context->local()->addval('note', $this->bean);
             return [!empty($emess), $emess];
         }
-
     }
 ?>

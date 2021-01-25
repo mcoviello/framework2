@@ -36,6 +36,7 @@
             switch($bean)
             {
                 case 'project':
+                    //If it's a project, store it.
                     $rest = $context->rest();
                     $id = $rest[2];
                     $proj = $context->load($bean, $id);
@@ -49,6 +50,7 @@
                     }
                     return '@content/project.twig';
                 case 'note' :
+                    //If it;s a note, store it and it's parent project
                     $rest = $context->rest();
                     $id = $rest[2];
                     $note = $context->load($bean, $id);
@@ -62,11 +64,13 @@
                     {
                         throw new \Framework\Exception\BadValue('You do not have permission to view this note.');
                     }
+
+                    //Handle file uploads on the note page.
                     $fdt = $context->formdata('file');
                     if ($fdt->exists('uploads'))
                     {
-                        foreach($fdt->fileArray('uploads') as $ix => $fa)
-                        { // we only support private or public in this case so there is no flag
+                        foreach ($fdt->fileArray('uploads') as $ix => $fa)
+                        {
                             $upl = \R::dispense('upload');
                             $upl->note_id = $note->id;
                             if (!$upl->savefile($context, $fa, Config::UPUBLIC, $context->user(), $ix))
@@ -106,6 +110,7 @@ public function edit(Context $context, array $rest) : string
             $rest = $context->rest();
             $id = $rest[2];
             $editbean = $context->load($bean, $id);
+            //Check user permission to view the project
             if($editbean->id && $context->user()->id == $editbean->user_id)
             {
                 $context->local()->addval($bean, $editbean);
@@ -120,8 +125,10 @@ public function edit(Context $context, array $rest) : string
             $id = $rest[2];
             $editbean = $context->load($bean, $id);
             $proj = $context->load('project',$editbean->project_id);
+            //Check that the user owns the project that this note is stored in.
             if($proj->id && $editbean->id && $context->user()->id == $proj->user_id)
             {
+                //Store the note and the parent project
                 $context->local()->addval('project', $proj);
                 $context->local()->addval($bean, $editbean);
             }
@@ -134,6 +141,7 @@ public function edit(Context $context, array $rest) : string
             throw new \Framework\Exception\BadValue($rest[1].' is not viewable.');
     }
 
+    //if there is an edit request
     if (is_object($editbean))
     {
         if (($bid = $context->formdata('post')->fetch('bean', '')) !== '')
@@ -145,6 +153,7 @@ public function edit(Context $context, array $rest) : string
             \Framework\Utility\CSRFGuard::getinstance()->check();
             try
             {
+                //attempt to edit the bean and store it using the bean's edit method
                 [$error, $emess] = $editbean->edit($context);
             }
             catch (\Exception $e)
@@ -175,15 +184,14 @@ public function edit(Context $context, array $rest) : string
         public function handle(Context $context)
         {
             $rest = $context->rest();
+            $context->setPages();
             switch ($rest[0])
             {
                 case 'view':
-                    $context->setPages();
                     return $this->view($context, $rest);
                 case 'edit':
                     return $this->edit($context,$rest);
                 default:
-                    $context->setPages();
                     return '@content/projects.twig';
             }
         }
